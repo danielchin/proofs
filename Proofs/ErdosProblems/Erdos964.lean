@@ -1015,7 +1015,7 @@ lemma coprime_Q_P_mul_R1 (data_p data_q : List (ℕ × ℕ × ℕ))
         intros q hq; exact Nat.Coprime.symm ( hp_prime q ( by aesop ) |> Nat.Prime.coprime_iff_not_dvd |> Iff.mpr <| fun h => h_coprime_p q hq <| by have := Nat.prime_dvd_prime_iff_eq ( hp_prime q ( by aesop ) ) ( hp_prime p ( by aesop ) ) ; tauto ) ;
       have h_coprime_p : Nat.Coprime p (List.prod (List.map (fun (p, x, y) => p ^ x) data_p)) ∧ Nat.Coprime p (List.prod (List.map (fun (p, x, y) => p ^ y) data_p)) := by
         have h_coprime_p : ∀ {l : List ℕ}, (∀ q ∈ l, Nat.Coprime p q) → Nat.Coprime p (List.prod l) := by
-          intros l hl; induction l <;> simp_all +decide [ Nat.coprime_mul_iff_right, Nat.coprime_mul_iff_left ] ;
+          intros l hl; induction l <;> simp_all +decide [Nat.coprime_mul_iff_right] ;
           grind;
         exact ⟨ h_coprime_p fun q hq => by rcases List.mem_map.mp hq with ⟨ x, hx, rfl ⟩ ; exact Nat.Coprime.pow_right _ <| by aesop, h_coprime_p fun q hq => by rcases List.mem_map.mp hq with ⟨ x, hx, rfl ⟩ ; exact Nat.Coprime.pow_right _ <| by aesop ⟩;
       exact Nat.Coprime.mul_right h_coprime_p.1 h_coprime_p.2;
@@ -1037,22 +1037,22 @@ lemma coprime_P_Q_mul_R2 (data_p data_q : List (ℕ × ℕ × ℕ))
       have hp_in_data_p : p ∈ List.map (fun x => x.1) data_p := by
         have hp_in_data_p : p ∣ (data_p.map (fun (p, x, _) => p ^ x)).prod := by
           exact hp_div_P;
-        haveI := Fact.mk hp; simp_all +decide [ ← ZMod.natCast_eq_zero_iff, List.prod_map_mul ] ;
+        haveI := Fact.mk hp; simp_all +decide [← ZMod.natCast_eq_zero_iff] ;
         obtain ⟨ a, b, ⟨ x, hx ⟩, ha, hb ⟩ := hp_in_data_p; rw [ ZMod.natCast_eq_zero_iff ] at ha; rw [ Nat.prime_dvd_prime_iff_eq ] at ha <;> aesop;
       have hp_not_in_data_q : p ∉ List.map (fun x => x.1) data_q := by
         grind +ring
       have hp_not_div_QR2 : ¬(p ∣ Q_val data_q) := by
         have hp_not_div_QR2 : ∀ q ∈ List.map (fun x => x.1) data_q, ¬(p ∣ q) := by
           intro q hq hq_div_p; have := List.pairwise_append.mp hp_distinct; simp_all +decide [ Nat.prime_dvd_prime_iff_eq ] ;
-        haveI := Fact.mk hp; simp_all +decide [ ← ZMod.natCast_eq_zero_iff, List.prod_map_mul ] ;
-        unfold Q_val; simp_all +decide [ Finset.prod_eq_zero_iff ] ;
+        haveI := Fact.mk hp; simp_all +decide [← ZMod.natCast_eq_zero_iff] ;
+        unfold Q_val; simp_all +decide ;
         exact fun x y z h₁ h₂ => False.elim <| hp_not_div_QR2 x y z h₁ h₂
       have hp_not_div_QR2' : ¬(p ∣ R2_val data_q) := by
         have hp_not_div_R2 : ∀ q ∈ data_q.map (fun x => x.1), ¬(p ∣ q) := by
           intro q hq; intro hq_div_p; have := Nat.prime_dvd_prime_iff_eq hp ( hp_prime q ( List.mem_append_right _ hq ) ) ; aesop;
         simp_all +decide [ R2_val, Nat.Prime.dvd_iff_not_coprime hp ];
         have hp_not_div_R2 : ∀ {l : List ℕ}, (∀ q ∈ l, Nat.gcd p q = 1) → Nat.gcd p (List.prod l) = 1 := by
-          intros l hl; induction l <;> simp_all +decide [ Nat.coprime_mul_iff_left, Nat.coprime_mul_iff_right ] ;
+          intros l hl; induction l <;> simp_all +decide [Nat.coprime_mul_iff_right] ;
           tauto;
         exact hp_not_div_R2 fun q hq => by obtain ⟨ x, hx, rfl ⟩ := List.mem_map.mp hq; exact Nat.Coprime.pow_right _ ( by aesop ) ;
       have hp_not_div_QR2'' : ¬(p ∣ Q_val data_q * R2_val data_q) := by
@@ -1106,7 +1106,7 @@ P_val is odd.
 lemma odd_P_val (data_p : List (ℕ × ℕ × ℕ))
   (hp_odd : ∀ p ∈ data_p.map (fun x => x.1), Odd p) :
   Odd (P_val data_p) := by
-    induction data_p <;> simp_all +decide [ Nat.mul_mod, Nat.even_iff, Nat.odd_iff ];
+    induction data_p <;> simp_all +decide [Nat.odd_iff];
     unfold P_val; simp +decide [ *, Nat.mul_mod ] ;
     norm_num [ Nat.pow_mod, hp_odd.1 ] ; aesop;
 
@@ -1116,7 +1116,7 @@ R2_val is odd.
 lemma odd_R2_val (data_q : List (ℕ × ℕ × ℕ))
   (hp_odd : ∀ p ∈ data_q.map (fun x => x.1), Odd p) :
   Odd (R2_val data_q) := by
-    induction data_q <;> simp_all +decide [ Nat.even_add, Nat.even_pow ];
+    induction data_q <;> simp_all +decide;
     exact Odd.mul ( hp_odd.1.pow ) ‹_›
 
 /-
@@ -1212,7 +1212,7 @@ a/2+1 is odd.
 -/
 lemma odd_a_div_two_plus_one (data_p data_q : List (ℕ × ℕ × ℕ)) :
   Odd (construct_a data_p data_q / 2 + 1) := by
-    unfold construct_a; simp +decide [ Nat.mul_div_assoc, parity_simps ] ;
+    unfold construct_a; simp +decide [parity_simps] ;
     exact even_iff_two_dvd.mpr ( Nat.dvd_div_of_mul_dvd ( dvd_mul_of_dvd_left ( by exact dvd_mul_of_dvd_left ( by decide ) _ ) _ ) )
 
 /-
@@ -1285,7 +1285,7 @@ lemma prod_f_rat_eq (data_p : List (ℕ × ℕ × ℕ))
   (hd : (data_p.map (·.1)).Pairwise (· ≠ ·)) :
   (tau (P_val data_p) * tau (R1_val data_p) : ℚ) / tau (P_val data_p * R1_val data_p) = (data_p.map (fun (_, x, y) => f_rat x y)).prod := by
     rw [ tau_P data_p hp hd, tau_R1 data_p hp hd, tau_P_mul_R1 data_p hp hd ];
-    unfold f_rat; simp +decide [ List.prod_map_mul ] ;
+    unfold f_rat; simp +decide ;
     induction data_p <;> simp +decide [ *, Function.comp ];
     grind
 
@@ -1354,9 +1354,9 @@ lemma target_eq_target_val (data_p data_q : List (ℕ × ℕ × ℕ))
       simp +decide [ mul_assoc, mul_comm, mul_left_comm, ne_of_gt ( show 0 < tau ( 1 + a ) from Finset.card_pos.mpr ⟨ 1, by aesop_cat ⟩ ), ne_of_gt ( show 0 < tau ( 1 + a / 2 ) from Finset.card_pos.mpr ⟨ 1, by aesop_cat ⟩ ) ];
     convert h_ratio using 1;
     rw [ prod_f_rat_eq, prod_inv_f_rat_eq ];
-    · exact?;
+    · exact rfl;
     · exact fun p hp => hp_prime p <| List.mem_append_right _ hp;
-    · exact hp_distinct.sublist ( by simp +decide [ List.sublist_append_right ] );
+    · exact hp_distinct.sublist ( by simp +decide );
     · exact fun p hp => hp_prime p <| List.mem_append_left _ hp;
     · exact List.pairwise_append.mp hp_distinct |>.1
 
@@ -1386,7 +1386,7 @@ lemma suitable_primes_exist (a : ℕ) (r : Fin 3 → ℕ)
         · exact this;
         · simp +decide [ *, a_seq ];
           exact ⟨ ⟨ ⟨ ha.ne', ne_of_gt ( hr 0 ) ⟩, ne_of_gt ( hr 1 ) ⟩, ne_of_gt ( hr 2 ) ⟩;
-      refine' ⟨ p, hp_prime, hp_distinct, _, _ ⟩ <;> simp_all +decide [ Nat.coprime_mul_iff_left, Nat.coprime_mul_iff_right ];
+      refine' ⟨ p, hp_prime, hp_distinct, _, _ ⟩ <;> simp_all +decide [Nat.coprime_mul_iff_right];
       · intro i j; specialize hp_coprime i; fin_cases j <;> tauto;
       · exact fun i j => by fin_cases j <;> simp_all +decide [ Nat.Coprime ] ;
 
@@ -1402,7 +1402,7 @@ lemma r1_coprime_a_plus_one (data_p data_q : List (ℕ × ℕ × ℕ))
     -- Let `p` be a prime factor of `r1`.
     by_contra h_not_coprime
     obtain ⟨p, hp_prime, hp_div⟩ : ∃ p, Nat.Prime p ∧ p ∣ R1_val data_p ∧ p ∣ construct_a data_p data_q + 1 := by
-      exact?;
+      exact Nat.Prime.not_coprime_iff_dvd.mp h_not_coprime;
     -- Since `p` divides `R1_val data_p`, it must also divide `construct_a data_p data_q`.
     have hp_div_a : p ∣ construct_a data_p data_q := by
       apply prime_dvd_R1_imp_dvd_a data_p data_q h_pos p hp_prime hp_div.left;
@@ -1415,7 +1415,7 @@ lemma prime_dvd_R2_imp_mem (data_q : List (ℕ × ℕ × ℕ))
   (hp_prime : ∀ p ∈ data_q.map (fun x => x.1), Nat.Prime p)
   (p : ℕ) (hp : Nat.Prime p) (h : p ∣ R2_val data_q) :
   p ∈ data_q.map (fun x => x.1) := by
-    exact?
+    exact prime_dvd_R1_imp_mem data_q hp_prime p hp h
 
 /-
 R1_val and R2_val are coprime.
@@ -1463,7 +1463,7 @@ lemma r2_coprime_a_plus_two (data_p data_q : List (ℕ × ℕ × ℕ))
   r2.Coprime (a + 2) := by
     refine' Nat.coprime_of_dvd' _;
     intro k hk hk' hk''; have := Nat.dvd_sub hk'' ( prime_dvd_R2_imp_dvd_a data_p data_q h_pos k hk hk' ) ; simp_all +decide [ Nat.prime_dvd_prime_iff_eq ] ;
-    contrapose! hk'; simp_all +decide [ List.foldr_map ] ;
+    contrapose! hk'; simp_all +decide ;
     exact Nat.odd_iff.mp ( odd_R2_val data_q fun p hp => hp_odd p <| by aesop ) |> fun h => h.symm ▸ rfl;
 
 /-
@@ -1506,8 +1506,8 @@ lemma target_val_in_R_set (hGPY : GoldstonGrahamPintzYildirimStatement)
       v3 = (d1 * d3 * d6 : ℚ) / (d2 * d4 * d5 : ℚ) := by
         have := R_contains_modified_values hGPY (construct_a data_p data_q) (construct_r data_p data_q) p (fun i => (if i = 0 then tau (a_seq (construct_a data_p data_q) 1 * construct_r data_p data_q 0) * tau (a_seq (construct_a data_p data_q) 2 * construct_r data_p data_q 1) * tau (a_seq (construct_a data_p data_q) 0 / 2 * construct_r data_p data_q 2) ^ 2 else if i = 1 then tau (a_seq (construct_a data_p data_q) 1 * construct_r data_p data_q 0) * tau (a_seq (construct_a data_p data_q) 1 * construct_r data_p data_q 2) * tau (a_seq (construct_a data_p data_q) 2 / 2 * construct_r data_p data_q 0) * tau (a_seq (construct_a data_p data_q) 0 / 2 * construct_r data_p data_q 2) else tau (a_seq (construct_a data_p data_q) 0 * construct_r data_p data_q 1) * tau (a_seq (construct_a data_p data_q) 1 * construct_r data_p data_q 2) * tau (a_seq (construct_a data_p data_q) 2 / 2 * construct_r data_p data_q 0) ^ 2)) ha_even ha_pos hr_gt_one hr_odd hr_coprime hra_coprime hp_prime hp_distinct hp_coprime_a hp_coprime_r (by
         simp +decide [ Fin.forall_fin_succ ];
-        unfold tau; simp +decide [ Nat.div_eq_of_lt ] ;
-        unfold a_seq; simp +decide [ *, Nat.div_eq_of_lt ] ;
+        unfold tau; simp +decide ;
+        unfold a_seq; simp +decide [*] ;
         exact ⟨ ⟨ ⟨ ne_of_gt ( hr_gt_one 0 ), ne_of_gt ( hr_gt_one 1 ) ⟩, pow_pos ( Finset.card_pos.mpr ⟨ 1, Nat.one_mem_divisors.mpr ( Nat.ne_of_gt ( Nat.mul_pos ( Nat.div_pos ( Nat.le_of_dvd ha_pos ( even_iff_two_dvd.mp ha_even ) ) zero_lt_two ) ( hr_gt_one 2 ) ) ) ⟩ ) 2 ⟩, ⟨ ⟨ ⟨ ne_of_gt ( hr_gt_one 0 ), ne_of_gt ( hr_gt_one 2 ) ⟩, ne_of_gt ( hr_gt_one 0 ) ⟩, Nat.le_of_dvd ha_pos ( even_iff_two_dvd.mp ha_even ), ne_of_gt ( hr_gt_one 2 ) ⟩, ⟨ ⟨ ne_of_gt ha_pos, ne_of_gt ( hr_gt_one 1 ) ⟩, ne_of_gt ( hr_gt_one 2 ) ⟩, pow_pos ( Finset.card_pos.mpr ⟨ 1, Nat.one_mem_divisors.mpr ( Nat.ne_of_gt ( Nat.mul_pos ( Nat.succ_pos _ ) ( hr_gt_one 0 ) ) ) ⟩ ) 2 ⟩) ; simp_all +decide [ Fin.forall_fin_succ ] ; (
         grind)
     generalize_proofs at *; (
@@ -1535,13 +1535,13 @@ lemma R_set_contains_pos_rationals (q : ℚ) (hq : 0 < q) (hGPY : GoldstonGraham
   have hp_odd : Odd p := by
     have hp_odd : Odd (R1_val data_p) ∧ Odd (R2_val data_q) := by
       exact ⟨ hr_odd 1, hr_odd 2 ⟩;
-    by_cases hp_p : p ∈ data_p.map (fun x => x.1) <;> by_cases hp_q : p ∈ data_q.map (fun x => x.1) <;> simp_all +decide [ Nat.Prime.even_iff ];
+    by_cases hp_p : p ∈ data_p.map (fun x => x.1) <;> by_cases hp_q : p ∈ data_q.map (fun x => x.1) <;> simp_all +decide;
     · have := hp_distinct; simp_all +decide [ List.pairwise_append ] ;
       grind;
     · have hp_div_R1 : p ∣ R1_val data_p := by
         exact dvd_trans ( dvd_pow_self _ ( ne_of_gt ( h_pos.1 _ _ _ hp_p.choose_spec.choose_spec |>.2 ) ) ) ( List.dvd_prod ( List.mem_map.mpr ⟨ _, hp_p.choose_spec.choose_spec, rfl ⟩ ) ) ;
       exact hp_odd.1.of_dvd_nat hp_div_R1;
-    · obtain ⟨ a, b, h ⟩ := hp_q; specialize hp_odd; replace hp_odd := hp_odd.2.of_dvd_nat ( show p ∣ R2_val data_q from ?_ ) ; simp_all +decide [ Nat.Prime.even_iff ] ;
+    · obtain ⟨ a, b, h ⟩ := hp_q; specialize hp_odd; replace hp_odd := hp_odd.2.of_dvd_nat ( show p ∣ R2_val data_q from ?_ ) ; simp_all +decide ;
       exact dvd_trans ( dvd_pow_self _ ( by linarith [ h_pos.2 _ _ _ h ] ) ) ( List.dvd_prod ( List.mem_map.mpr ⟨ _, h, rfl ⟩ ) )
   exact hp_odd) hp_distinct (by
   grind) hr_odd
