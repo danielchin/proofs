@@ -68,7 +68,7 @@ def GoldstonGrahamPintzYildirimStatement : Prop :=
     (∀ i j, i ≠ j → (r i).Coprime (if a i > a j then a i - a j else a j - a i)) →
     (∀ i j, i ≠ j → (r i).Coprime (r j)) →
     ∀ C : ℕ,
-      ∃ i j, i < j ∧ {x : ℕ | ∃ (h1 : r i ∣ L (a i) x) (h2 : r j ∣ L (a j) x),
+      ∃ i j, i < j ∧ {x : ℕ | r i ∣ L (a i) x ∧ r j ∣ L (a j) x ∧
         (L (a i) x) / r i ∈ E2 C ∧ (L (a j) x) / r j ∈ E2 C}.Infinite
 
 /-
@@ -87,7 +87,7 @@ a2 * L1 - a1 * L2 = 1
 a3 * L2 - a2 * L3 = 1
 a3/2 * L1 - a1/2 * L3 = 1
 -/
-lemma identities (a : ℕ) (ha : Even a) (x : ℕ) :
+lemma identities (a : ℕ) (x : ℕ) :
   let a_vec := a_seq a
   (a_vec 1 * L (a_vec 0) x = a_vec 0 * L (a_vec 1) x + 1) ∧
   (a_vec 2 * L (a_vec 1) x = a_vec 1 * L (a_vec 2) x + 1) ∧
@@ -115,7 +115,6 @@ Proof sketch:
 9. The result follows.
 -/
 lemma ratio_lemma_12 (a : ℕ) (r : Fin 3 → ℕ) (C : ℕ) (x : ℕ)
-  (ha : Even a)
   (hr : ∀ i, 0 < r i)
   (hC : ∀ p, p.Prime → p ∣ (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) → p ≤ C)
   (h1 : r 0 ∣ L (a_seq a 0) x)
@@ -185,7 +184,6 @@ Analogous to ratio_lemma_12 but for indices 1 and 2.
 If L2/r2 and L3/r3 are in E2(C), then d(n+1)/d(n) = d(a3 r2)/d(a2 r3).
 -/
 lemma ratio_lemma_23 (a : ℕ) (r : Fin 3 → ℕ) (C : ℕ) (x : ℕ)
-  (ha : Even a)
   (hr : ∀ i, 0 < r i)
   (hC : ∀ p, p.Prime → p ∣ (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) → p ≤ C)
   (h1 : r 1 ∣ L (a_seq a 1) x)
@@ -377,16 +375,16 @@ lemma R_contains_one_of_three (hGPY : GoldstonGrahamPintzYildirimStatement)
   (hra : ∀ i, (r i).Coprime (a_seq a i)) :
   val1 a r ∈ R_set ∨ val2 a r ∈ R_set ∨ val3 a r ∈ R_set := by
     -- By the properties of the Goldston-Graham-Pintz-Yildirim theorem, we can find such `i` and `j`.
-    obtain ⟨i, j, hij, h_inf⟩ : ∃ i j : Fin 3, i < j ∧ {x : ℕ | ∃ (h1 : r i ∣ L (a_seq a i) x) (h2 : r j ∣ L (a_seq a j) x), (L (a_seq a i) x) / r i ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2)) ∧ (L (a_seq a j) x) / r j ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2))}.Infinite := by
-      convert hGPY ( a_seq a ) r _ _ _ _ _ _ using 6;
-      · exact fun i => by fin_cases i <;> [ exact ha_pos; exact Nat.succ_pos _; exact Nat.succ_pos _ ] ;
-      · assumption;
-      · assumption;
-      · intro i j hij; fin_cases i <;> fin_cases j <;> simp_all +decide [ Fin.forall_fin_succ ] ;
-        all_goals unfold a_seq; simp +decide [*] ;
-      · assumption;
-    -- We'll use the fact that if the set of $x$ is infinite, then � the� set of corresponding $n$ values is also infinite.
-    have h_infinite_n : Set.Infinite {n : ℕ | ∃ x : ℕ, ∃ hx : r i ∣ L (a_seq a i) x, ∃ hx' : r j ∣ L (a_seq a j) x, L (a_seq a i) x / r i ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2)) ∧ L (a_seq a j) x / r j ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2)) ∧ n = if i = 0 ∧ j = 1 then a_seq a 0 * L (a_seq a 1) x else if i = 1 ∧ j = 2 then a_seq a 1 * L (a_seq a 2) x else (a_seq a 0) * L (a_seq a 2) x / 2} := by
+    obtain ⟨i, j, hij, h_inf⟩ := hGPY (a_seq a) r
+      (fun i => by fin_cases i <;> [ exact ha_pos; exact Nat.succ_pos _; exact Nat.succ_pos _ ])
+      hr hra
+      (fun i j hij => by
+        fin_cases i <;> fin_cases j <;> simp_all +decide [ Fin.forall_fin_succ ]
+        all_goals unfold a_seq; simp +decide [*])
+      hr_coprime
+      (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2))
+    -- We'll use the fact that if the set of $x$ is infinite, then the set of corresponding $n$ values is also infinite.
+    have h_infinite_n : Set.Infinite {n : ℕ | ∃ x : ℕ, r i ∣ L (a_seq a i) x ∧ r j ∣ L (a_seq a j) x ∧ L (a_seq a i) x / r i ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2)) ∧ L (a_seq a j) x / r j ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2)) ∧ n = if i = 0 ∧ j = 1 then a_seq a 0 * L (a_seq a 1) x else if i = 1 ∧ j = 2 then a_seq a 1 * L (a_seq a 2) x else (a_seq a 0) * L (a_seq a 2) x / 2} := by
       intro H;
       apply h_inf;
       refine' Set.Finite.subset ( H.preimage _ ) _;
@@ -403,33 +401,32 @@ lemma R_contains_one_of_three (hGPY : GoldstonGrahamPintzYildirimStatement)
             · exact dvd_mul_of_dvd_left ( even_iff_two_dvd.mp ( by unfold a_seq; simp +decide [ ha, parity_simps ] ) ) _;
           · exact dvd_mul_of_dvd_left ( even_iff_two_dvd.mp ( by unfold a_seq; simp +decide [ ha, parity_simps ] ) ) _;
         · simp +decide [L, a_seq] at *;
-      · exact fun x hx => ⟨ x, hx.choose, hx.choose_spec.choose, hx.choose_spec.choose_spec.1, hx.choose_spec.choose_spec.2, rfl ⟩;
-    -- By the properties of the Goldston-Graham-Pintz-Yildirim theorem, we � can� find such `i` and `j` and use them to show that one of the three values is in `R_set`.
-    have h_ratio : ∀ x : ℕ, (∃ h1 : r i ∣ L (a_seq a i) x, ∃ h2 : r j ∣ L (a_seq a j) x, L (a_seq a i) x / r i ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2)) ∧ L (a_seq a j) x / r j ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2))) → (tau ((if i = 0 ∧ j = 1 then a_seq a 0 * L (a_seq a 1) x else if i = 1 ∧ j = 2 then a_seq a 1 * L (a_seq a 2) x else (a_seq a 0) * L (a_seq a 2) x / 2) + 1) : ℚ) / (tau (if i = 0 ∧ j = 1 then a_seq a 0 * L (a_seq a 1) x else if i = 1 ∧ j = 2 then a_seq a 1 * L (a_seq a 2) x else (a_seq a 0) * L (a_seq a 2) x / 2) : ℚ) = if i = 0 ∧ j = 1 then val1 a r else if i = 1 ∧ j = 2 then val2 a r else val3 a r := by
+      · exact fun x hx => ⟨ x, hx.1, hx.2.1, hx.2.2.1, hx.2.2.2, rfl ⟩;
+    -- By the properties of the Goldston-Graham-Pintz-Yildirim theorem, we can find such `i` and `j` and use them to show that one of the three values is in `R_set`.
+    have h_ratio : ∀ x : ℕ, (r i ∣ L (a_seq a i) x ∧ r j ∣ L (a_seq a j) x ∧ L (a_seq a i) x / r i ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2)) ∧ L (a_seq a j) x / r j ∈ E2 (Nat.findGreatest (fun p => p.Prime ∧ p ∣ a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2) (a_seq a 0 * a_seq a 1 * a_seq a 2 * r 0 * r 1 * r 2))) → (tau ((if i = 0 ∧ j = 1 then a_seq a 0 * L (a_seq a 1) x else if i = 1 ∧ j = 2 then a_seq a 1 * L (a_seq a 2) x else (a_seq a 0) * L (a_seq a 2) x / 2) + 1) : ℚ) / (tau (if i = 0 ∧ j = 1 then a_seq a 0 * L (a_seq a 1) x else if i = 1 ∧ j = 2 then a_seq a 1 * L (a_seq a 2) x else (a_seq a 0) * L (a_seq a 2) x / 2) : ℚ) = if i = 0 ∧ j = 1 then val1 a r else if i = 1 ∧ j = 2 then val2 a r else val3 a r := by
       fin_cases i <;> fin_cases j <;> simp +decide at hij;
       · intro x hx;
-        convert ratio_lemma_12 a r _ x ha hr _ hx.1 hx.2.1 hx.2.2.1 hx.2.2.2 using 1;
+        convert ratio_lemma_12 a r _ x hr _ hx.1 hx.2.1 hx.2.2.1 hx.2.2.2 using 1;
         intro p pp dp; refine' Nat.le_findGreatest _ _ <;> norm_num at *;
         · exact Nat.le_of_dvd ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop ) ) ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop ) ) ) ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop ) ) ) ( hr 0 ) ) ( hr 1 ) ) ( hr 2 ) ) dp;
         · grind;
       · simp +zetaDelta at *;
-        intro x hx₁ hx₂ hx hx; exact (by
-        convert ratio_lemma_13 a r _ x ha hr _ _ hx₂ hx₁ hx using 1;
+        intro x hx1 hx2 hx3 hx4; exact (by
+        convert ratio_lemma_13 a r _ x ha hr _ hx1 hx2 hx3 hx4 using 1;
         · unfold val3; ring_nf;
           rw [ Nat.mul_comm ( a_seq a 2 / 2 ), Nat.mul_comm ( a_seq a 0 / 2 ) ] ; rw [ Nat.mul_div_assoc _ ( even_iff_two_dvd.mp ( by unfold a_seq; simp +decide [ *, parity_simps ] ) ), Nat.mul_div_assoc _ ( even_iff_two_dvd.mp ( by unfold a_seq; simp +decide [ *, parity_simps ] ) ) ] ;
         · intro p pp dp; refine' Nat.le_findGreatest _ _;
           · exact Nat.le_of_dvd ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop ) ) ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop ) ) ) ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop ) ) ) ( hr 0 ) ) ( hr 1 ) ) ( hr 2 ) ) dp;
-          · exact And.symm ⟨dp, pp⟩;
-        · assumption);
+          · exact And.symm ⟨dp, pp⟩ );
       · intro x hx;
-        convert ratio_lemma_23 a r _ x ha hr _ hx.1 hx.2.1 hx.2.2.1 hx.2.2.2 using 1;
+        convert ratio_lemma_23 a r _ x hr _ hx.1 hx.2.1 hx.2.2.1 hx.2.2.2 using 1;
         intro p pp dp; refine' Nat.le_findGreatest _ _;
         · exact Nat.le_of_dvd ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.mul_pos ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop_cat ) ) ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop_cat ) ) ) ( Nat.pos_of_ne_zero ( by unfold a_seq; aesop_cat ) ) ) ( Nat.pos_of_ne_zero ( by linarith [ hr 0 ] ) ) ) ( Nat.pos_of_ne_zero ( by linarith [ hr 1 ] ) ) ) ( Nat.pos_of_ne_zero ( by linarith [ hr 2 ] ) ) ) dp;
         · exact And.symm ⟨dp, pp⟩;
     contrapose! h_infinite_n;
     simp_all +decide [ R_set ];
     refine Set.Finite.subset ( h_infinite_n.1.union ( h_infinite_n.2.1.union h_infinite_n.2.2 ) ) ?_;
-    rintro n ⟨ x, hx₁, hx₂, hx₃, hx₄, rfl ⟩ ; specialize h_ratio x hx₁ hx₃ hx₄ hx₂; aesop;
+    rintro n ⟨ x, hx₁, hx₂, hx₃, hx₄, rfl ⟩ ; specialize h_ratio x; aesop;
 
 /-
 By modifying r_i to r'_i = r_i * p_i^(e_i-1), we can show that R contains one of the modified values.
@@ -528,7 +525,7 @@ So all arguments to tau are positive, so tau >= 1, so d_i >= 1.
 So denominators are non-zero.
 -/
 lemma equal_values_lemma (a : ℕ) (r : Fin 3 → ℕ)
-  (ha : Even a) (ha_pos : 0 < a)
+  (ha_pos : 0 < a)
   (hr : ∀ i, 0 < r i) :
   let d1 := tau (a_seq a 1 * r 0)
   let d2 := tau (a_seq a 0 * r 1)
@@ -660,7 +657,6 @@ lemma exists_representation (q : ℚ) (hq : 0 < q) :
             · exact ⟨ [ ], [ ], by norm_num, by norm_num, by norm_num ⟩;
             · rename_i hx hy ihx hyx; obtain ⟨ data_p, data_q, h₁, h₂, h₃ ⟩ := ihx; obtain ⟨ data_p', data_q', h₄, h₅, h₆ ⟩ := hyx; use data_p ++ data_p', data_q ++ data_q'; simp_all +decide [ mul_assoc, mul_comm, mul_left_comm ] ;
               exact ⟨ fun y hy => hy.elim ( fun hy => h₂ y hy ) fun hy => h₅ y hy, fun y hy => hy.elim ( fun hy => h₃ y hy ) fun hy => h₆ y hy ⟩
-              skip;
             · rename_i hx ih; obtain ⟨ data_p, data_q, h₁, h₂, h₃ ⟩ := ih; use data_q, data_p; aesop;
           field_simp;
           obtain ⟨ data_p, data_q, h₁, h₂, h₃ ⟩ := h_prod ( Units.mk0 ( q * 3 / 4 ) ( by positivity ) ) ( by simpa using G_is_everything_pos_rat ( q * 3 / 4 ) ( by positivity ) );
@@ -723,7 +719,6 @@ lemma exists_representation_odd_primes (q : ℚ) (hq : 0 < q) :
         · intro i j hij; convert hps.2.2 ⟨ data_p.length + i, by
             linarith [ Fin.is_lt i, Fin.is_lt j, show ( i : ℕ ) < List.length data_q from by simpa [ hps.1 ] using i.2, show ( j : ℕ ) < List.length data_q from by simpa [ hps.1 ] using j.2 ] ⟩ ⟨ data_p.length + j, by
             grind ⟩ ( by simpa [ Fin.ext_iff ] using hij ) using 1;
-          skip;
         · intro a ha b hb; rw [ List.mem_iff_get ] at ha hb; obtain ⟨ i, hi ⟩ := ha; obtain ⟨ j, hj ⟩ := hb; simp_all +decide ;
           refine' hi ▸ hj ▸ hps.2.2 ⟨ i, by
             exact lt_of_lt_of_le i.2 ( by simp +decide [ hps.1 ] ) ⟩ ⟨ data_p.length + j, by
@@ -734,8 +729,7 @@ lemma exists_representation_odd_primes (q : ℚ) (hq : 0 < q) :
 The constructed values `a` and `r` satisfy `a > 0`, `a` is even, and `r i > 0`.
 -/
 lemma construct_basic_properties (data_p data_q : List (ℕ × ℕ × ℕ))
-  (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
-  (hr_odd : ∀ i, Odd (construct_r data_p data_q i)) :
+  (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p) :
   let a := construct_a data_p data_q
   let r := construct_r data_p data_q
   0 < a ∧ Even a ∧ (∀ i, 0 < r i) := by
@@ -912,8 +906,6 @@ lemma prime_dvd_R2_imp_dvd_a (data_p data_q : List (ℕ × ℕ × ℕ))
 a+1 and R2 are coprime.
 -/
 lemma coprime_a_plus_one_R2 (data_p data_q : List (ℕ × ℕ × ℕ))
-  (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
-  (hp_odd : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Odd p)
   (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
   let a := construct_a data_p data_q
   let r2 := R2_val data_q
@@ -943,7 +935,6 @@ lemma prime_dvd_R1_imp_dvd_a (data_p data_q : List (ℕ × ℕ × ℕ))
 a+2 and R1 are coprime.
 -/
 lemma coprime_a_plus_two_R1 (data_p data_q : List (ℕ × ℕ × ℕ))
-  (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
   (hp_odd : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Odd p)
   (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
   let a := construct_a data_p data_q
@@ -1075,8 +1066,7 @@ tau(a * R1) = 3 * tau(Q) * tau(P * R1).
 lemma tau_a_mul_R1 (data_p data_q : List (ℕ × ℕ × ℕ))
   (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
   (hp_odd : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Odd p)
-  (hp_distinct : (data_p.map (fun x => x.1) ++ data_q.map (fun x => x.1)).Pairwise (· ≠ ·))
-  (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
+  (hp_distinct : (data_p.map (fun x => x.1) ++ data_q.map (fun x => x.1)).Pairwise (· ≠ ·)) :
   let a := construct_a data_p data_q
   let r1 := R1_val data_p
   tau (a * r1) = 3 * tau (Q_val data_q) * tau (P_val data_p * r1) := by
@@ -1125,12 +1115,11 @@ tau(a * R1) = 3 * tau(Q) * tau(P * R1).
 lemma tau_a_mul_R1_eq (data_p data_q : List (ℕ × ℕ × ℕ))
   (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
   (hp_odd : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Odd p)
-  (hp_distinct : (data_p.map (fun x => x.1) ++ data_q.map (fun x => x.1)).Pairwise (· ≠ ·))
-  (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
+  (hp_distinct : (data_p.map (fun x => x.1) ++ data_q.map (fun x => x.1)).Pairwise (· ≠ ·)) :
   let a := construct_a data_p data_q
   let r1 := R1_val data_p
   tau (a * r1) = 3 * tau (Q_val data_q) * tau (P_val data_p * r1) := by
-    convert tau_a_mul_R1 data_p data_q hp_prime hp_odd hp_distinct h_pos using 1
+    convert tau_a_mul_R1 data_p data_q hp_prime hp_odd hp_distinct using 1
 
 /-
 tau(a/2 * R2) = 2 * tau(P) * tau(Q * R2).
@@ -1138,8 +1127,7 @@ tau(a/2 * R2) = 2 * tau(P) * tau(Q * R2).
 lemma tau_a_div_two_mul_R2 (data_p data_q : List (ℕ × ℕ × ℕ))
   (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
   (hp_odd : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Odd p)
-  (hp_distinct : (data_p.map (fun x => x.1) ++ data_q.map (fun x => x.1)).Pairwise (· ≠ ·))
-  (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
+  (hp_distinct : (data_p.map (fun x => x.1) ++ data_q.map (fun x => x.1)).Pairwise (· ≠ ·)) :
   let a := construct_a data_p data_q
   let r2 := R2_val data_q
   tau (a / 2 * r2) = 2 * tau (P_val data_p) * tau (Q_val data_q * r2) := by
@@ -1240,7 +1228,6 @@ lemma tau_a_plus_two (data_p data_q : List (ℕ × ℕ × ℕ)) :
 tau((a+2)*r1) = 2 * tau(a/2+1) * tau(r1).
 -/
 lemma d3_eq (data_p data_q : List (ℕ × ℕ × ℕ))
-  (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
   (hp_odd : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Odd p)
   (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
   let a := construct_a data_p data_q
@@ -1250,7 +1237,6 @@ lemma d3_eq (data_p data_q : List (ℕ × ℕ × ℕ))
     have h_coprime : let a := construct_a data_p data_q; let r1 := R1_val data_p; (a + 2).Coprime r1 := by
       apply coprime_a_plus_two_R1;
       · assumption;
-      · grind;
       · assumption;
     -- By Lemma 26, `tau((a+2)*r1) = tau(a+2) * tau(r1)`.
     have h_tau_mul : let a := construct_a data_p data_q; let r1 := R1_val data_p; tau ((a + 2) * r1) = tau (a + 2) * tau r1 := by
@@ -1265,8 +1251,6 @@ lemma d3_eq (data_p data_q : List (ℕ × ℕ × ℕ))
 tau((a+1)*r2) = tau(a+1) * tau(r2).
 -/
 lemma d4_eq (data_p data_q : List (ℕ × ℕ × ℕ))
-  (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
-  (hp_odd : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Odd p)
   (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
   let a := construct_a data_p data_q
   let r2 := R2_val data_q
@@ -1275,7 +1259,7 @@ lemma d4_eq (data_p data_q : List (ℕ × ℕ × ℕ))
     have h_divisors_mul : ∀ {m n : ℕ}, Nat.gcd m n = 1 → (Nat.divisors (m * n)).card = (Nat.divisors m).card * (Nat.divisors n).card := by
       exact fun {m n} a ↦ Nat.Coprime.card_divisors_mul a;
     apply h_divisors_mul;
-    convert coprime_a_plus_one_R2 data_p data_q hp_prime hp_odd h_pos using 1
+    convert coprime_a_plus_one_R2 data_p data_q h_pos using 1
 
 /-
 (tau(P) * tau(R1)) / tau(P * R1) = \prod f_rat(x, y).
@@ -1394,7 +1378,6 @@ lemma suitable_primes_exist (a : ℕ) (r : Fin 3 → ℕ)
 r1 is coprime to a+1.
 -/
 lemma r1_coprime_a_plus_one (data_p data_q : List (ℕ × ℕ × ℕ))
-  (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
   (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
   let a := construct_a data_p data_q
   let r1 := R1_val data_p
@@ -1429,7 +1412,6 @@ lemma coprime_R1_R2 (data_p data_q : List (ℕ × ℕ × ℕ))
     have hk_mem_data_p : k ∈ data_p.map (fun x => x.1) := by
       apply prime_dvd_R1_imp_mem data_p (by
       exact fun p hp => hp_prime p <| List.mem_append_left _ hp) k hk_prime hk_div_R1
-      skip
     have hk_mem_data_q : k ∈ data_q.map (fun x => x.1) := by
       apply prime_dvd_R2_imp_mem data_q (fun p hp => hp_prime p (List.mem_append_right _ hp)) k hk_prime hk_div_R2
     have hk_ne : k ≠ k := by
@@ -1455,7 +1437,6 @@ lemma r_values_pairwise_coprime (data_p data_q : List (ℕ × ℕ × ℕ))
 r2 is coprime to a+2.
 -/
 lemma r2_coprime_a_plus_two (data_p data_q : List (ℕ × ℕ × ℕ))
-  (hp_prime : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Nat.Prime p)
   (hp_odd : ∀ p ∈ (data_p.map (fun x => x.1)) ++ (data_q.map (fun x => x.1)), Odd p)
   (h_pos : ∀ t ∈ data_p ++ data_q, 0 < t.2.1 ∧ 0 < t.2.2) :
   let a := construct_a data_p data_q
@@ -1488,8 +1469,8 @@ lemma target_val_in_R_set (hGPY : GoldstonGrahamPintzYildirimStatement)
     have hra_coprime : ∀ i, (construct_r data_p data_q i).Coprime (a_seq (construct_a data_p data_q) i) := by
       intro i
       fin_cases i <;> simp [construct_r, a_seq];
-      · convert r1_coprime_a_plus_one data_p data_q hp_prime h_pos using 1;
-      · convert r2_coprime_a_plus_two data_p data_q hp_prime hp_odd h_pos using 1
+      · convert r1_coprime_a_plus_one data_p data_q h_pos using 1;
+      · convert r2_coprime_a_plus_two data_p data_q hp_odd h_pos using 1
     have hp_exists : ∃ p : Fin 3 → ℕ, (∀ i, Nat.Prime (p i)) ∧ (∀ i j, i ≠ j → p i ≠ p j) ∧ (∀ i j, Nat.Coprime (p i) (a_seq (construct_a data_p data_q) j)) ∧ (∀ i j, Nat.Coprime (p i) (construct_r data_p data_q j)) := by
       apply suitable_primes_exist; assumption; exact hr_gt_one;
     obtain ⟨p, hp_prime, hp_distinct, hp_coprime_a, hp_coprime_r⟩ := hp_exists
@@ -1586,12 +1567,11 @@ The set of divisor ratios is dense in (0, \infty).
 -/
 theorem ErdosProblem964 (hGPY : GoldstonGrahamPintzYildirimStatement) :
   Set.Ioi (0 : ℝ) ⊆ closure (Set.image (fun q : ℚ => (q : ℝ)) divisor_ratios) := by
-    -- Since every positive rational is in `divisor_ratios`, the image of positive rationals is a subset of the image of `divisor_ratios`.
-    have h_image_subset : Set.image (fun q : ℚ => (q : ℝ)) {q : ℚ | 0 < q} ⊆ Set.image (fun q : ℚ => (q : ℝ)) divisor_ratios := by
-      exact Set.image_subset _ ( divisor_ratios_contains_all_pos_rats hGPY );
+    have h_image_subset : Set.image (fun q : ℚ => (q : ℝ)) {q : ℚ | 0 < q} ⊆ Set.image (fun q : ℚ => (q : ℝ)) divisor_ratios :=
+      Set.image_mono ( divisor_ratios_contains_all_pos_rats hGPY );
     exact Set.Subset.trans ( pos_rats_dense_in_pos_reals ) ( closure_mono h_image_subset )
 
-#print axioms ErdosProblem964
+-- #print axioms ErdosProblem964
 -- 'Erdos964.ErdosProblem964' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos964
