@@ -4,10 +4,19 @@ Lean version: leanprover/lean4:v4.24.0
 Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
 This project request had uuid: cb7932e2-d690-4fdf-a41b-5c786aa93c18
 
+Formalizes original paper:
+- [Eb25] S. Eberhard, Ratios of consecutive values of the divisor function. arXiv:2505.00727 (2025).
+
 -/
 
 /-
-We prove that the sequence of ratios of consecutive values of the divisor function, $\tau(n+1)/\tau(n)$, is everywhere dense in $(0, \infty)$, assuming the Goldston-Graham-Pintz-Yildirim theorem (GPY). The proof proceeds by showing that every positive rational number is a value taken by this sequence (in fact, infinitely often). This is achieved by constructing specific configurations of prime factors for $n$ and $n+1$ using the GPY theorem to ensure their existence. Finally, since the positive rationals are dense in the positive reals, the result follows.
+We prove that the sequence of ratios of consecutive values of the divisor function,
+$\tau(n+1)/\tau(n)$, is everywhere dense in $(0, \infty)$, assuming the
+Goldston-Graham-Pintz-Yildirim theorem (GPY). The proof proceeds by showing that every positive
+rational number is a value taken by this sequence (in fact, infinitely often). This is achieved by
+constructing specific configurations of prime factors for $n$ and $n+1$ using the GPY theorem to
+ensure their existence. Finally, since the positive rationals are dense in the positive reals, the
+result follows.
 -/
 
 import Mathlib
@@ -1583,5 +1592,6 @@ theorem ErdosProblem964 (hGPY : GoldstonGrahamPintzYildirimStatement) :
     exact Set.Subset.trans ( pos_rats_dense_in_pos_reals ) ( closure_mono h_image_subset )
 
 #print axioms ErdosProblem964
+-- 'Erdos964.ErdosProblem964' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos964
