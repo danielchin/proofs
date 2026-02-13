@@ -770,7 +770,7 @@ lemma exists_representation_clean (q : ℚ) (hq : 0 < q) :
       -- By cleaning the lists data_p and data_q, we ensure that all exponents are positive.
       obtain ⟨data_p, data_q, hq_eq, hr_odd, hp_prime, hp_distinct⟩ := exists_representation_odd_primes q hq;
       use data_p.filter (fun t => 0 < t.2.1 ∧ 0 < t.2.2), data_q.filter (fun t => 0 < t.2.1 ∧ 0 < t.2.2);
-      unfold target_val construct_r at *; simp_all +decide [ List.filter_cons ] ;
+      unfold target_val construct_r at *; simp_all +decide ;
       refine' ⟨ _, _, _, _ ⟩;
       · -- By definition of `f_rat`, we know that `f_rat x y = 1` if `x = 0` or `y = 0`.
         have h_f_rat_zero : ∀ x y : ℕ, x = 0 ∨ y = 0 → f_rat x y = 1 := by
@@ -788,7 +788,7 @@ lemma exists_representation_clean (q : ℚ) (hq : 0 < q) :
           · rw [ h_f_rat_zero _ _ ( Or.inl ( by linarith ) ), inv_one, one_mul ];
         simp +zetaDelta at *;
         rw [ h_filter, h_filter_inv ];
-      · simp_all +decide [ Fin.forall_fin_succ, List.filter_eq ];
+      · simp_all +decide [Fin.forall_fin_succ];
         have h_filter_odd : ∀ {l : List (ℕ × ℕ × ℕ)}, (∀ p ∈ l, Nat.Prime p.1) → Odd (List.prod (List.map (fun x => x.1 ^ x.2.2) l)) → Odd (List.prod (List.map (fun x => x.1 ^ x.2.2) (List.filter (fun t => decide (0 < t.2.1) && decide (0 < t.2.2)) l))) := by
           intros l hl_prime hl_odd; induction l <;> simp_all +decide [Nat.odd_iff, Nat.mul_mod,
             Nat.pow_mod] ;
@@ -829,21 +829,21 @@ lemma tau_P_mul_R1 (data_p : List (ℕ × ℕ × ℕ))
           rw [ h_mult ];
           · rw [ Nat.divisors_prime_pow ( hl_prime.2 _ _ _ ( Or.inl rfl ) ) ] ; aesop;
           · have h_coprime : ∀ {l : List (ℕ × ℕ × ℕ)}, (∀ d ∈ l, Nat.Prime d.1) → (List.Pairwise (fun x1 x2 => ¬x1.1 = x2.1) l) → ∀ {p : ℕ}, Nat.Prime p → (∀ d ∈ l, d.1 ≠ p) → Nat.Coprime (p ^ (‹ℕ × ℕ × ℕ›.2.1 + ‹ℕ × ℕ × ℕ›.2.2)) (List.prod (List.map (fun d => d.1 ^ (d.2.1 + d.2.2)) l)) := by
-              intros l hl_prime hl_pairwise p hp hne; induction l <;> simp_all +decide [ Nat.coprime_mul_iff_left, Nat.coprime_mul_iff_right ] ;
+              intros l hl_prime hl_pairwise p hp hne; induction l <;> simp_all +decide [Nat.coprime_mul_iff_right] ;
               exact ⟨ Nat.Coprime.pow _ _ <| hp.coprime_iff_not_dvd.mpr fun h => hne.1 <| by have := Nat.prime_dvd_prime_iff_eq hp hl_prime.1; tauto, by assumption ⟩;
             exact h_coprime ( fun d hd => hl_prime.2 _ _ _ <| Or.inr hd ) hl_pairwise.2.2 ( hl_prime.2 _ _ _ <| Or.inl rfl ) fun d hd => by aesop;
-        · induction ‹List ( ℕ × ℕ × ℕ ) › <;> simp_all +decide [ Nat.coprime_mul_iff_right, Nat.coprime_mul_iff_left ];
+        · induction ‹List ( ℕ × ℕ × ℕ ) › <;> simp_all +decide [Nat.coprime_mul_iff_right];
           rename_i k hk ih;
           exact ⟨ Nat.coprime_pow_primes _ _ hl_prime.1 ( hl_prime.2 _ _ _ ( Or.inl rfl ) ) ( by aesop ), ih ( fun a a_1 b hab => hl_prime.2 _ _ _ ( Or.inr hab ) ) ( fun a a_1 b hab => hl_pairwise.1 _ _ _ ( Or.inr hab ) ) ⟩;
       convert h_prod _ _ using 1;
       any_goals exact List.cons ‹_› ‹_›;
       · unfold tau; aesop;
-      · simp +decide [ mul_comm ];
+      · simp +decide;
       · aesop;
       · simp_all +decide [ List.pairwise_cons ];
         exact ⟨ hd.1, by simpa [ List.pairwise_map ] using hd.2 ⟩;
     convert h_divisors using 3;
-    unfold P_val R1_val; simp +decide [pow_add, mul_assoc, mul_comm, List.prod_map_mul] ;
+    unfold P_val R1_val; simp +decide [pow_add, List.prod_map_mul] ;
 
 /-
 The divisor function of P is the product of (x+1).
@@ -861,7 +861,7 @@ lemma tau_P (data_p : List (ℕ × ℕ × ℕ))
           simp_all +decide [ List.pairwise_append ];
           exact fun p x y h => by have := Nat.coprime_primes ( hp p ( Or.inl ⟨ x, y, h ⟩ ) ) ( hp ih.1 ( Or.inr rfl ) ) ; aesop;
         have h_coprime : ∀ {l : List ℕ}, (∀ p ∈ l, Nat.gcd p ih.1 = 1) → Nat.gcd (List.prod l) (ih.1 ^ ih.2.1) = 1 := by
-          intros l hl; induction l <;> simp_all +decide [ Nat.coprime_mul_iff_left, Nat.coprime_mul_iff_right ] ;
+          intros l hl; induction l <;> simp_all +decide [Nat.coprime_mul_iff_left] ;
           exact ⟨ Nat.Coprime.pow_right _ hl.1, by assumption ⟩;
         convert h_coprime _;
         simp +zetaDelta at *;
@@ -898,7 +898,7 @@ lemma prime_dvd_R2_imp_dvd_a (data_p data_q : List (ℕ × ℕ × ℕ))
     have h_div_Q : p ∣ Q_val data_q := by
       -- Since $p$ divides $R2_val data_q$, and $R2_val data_q$ is the product of $q^v$ for each $(q, u, v)$ in $data_q$, it follows that $p$ divides some $q^v$.
       obtain ⟨q, v, hq, hv⟩ : ∃ q v, (q, v) ∈ data_q.map (fun (q, u, v) => (q, v)) ∧ p ∣ q ^ v := by
-        haveI := Fact.mk hp; simp_all +decide [ ← ZMod.natCast_eq_zero_iff, List.prod_map_mul ] ;
+        haveI := Fact.mk hp; simp_all +decide [← ZMod.natCast_eq_zero_iff] ;
         unfold R2_val at h; simp_all +decide [ZMod.natCast_eq_zero_iff] ;
         grind;
       obtain ⟨t, ht⟩ : ∃ t ∈ data_q, t.1 = q ∧ t.2.2 = v := by
@@ -935,7 +935,7 @@ lemma prime_dvd_R1_imp_dvd_a (data_p data_q : List (ℕ × ℕ × ℕ))
     -- Since p divides R1_val, and R1_val is a product of primes raised to some powers, p must be one of those primes. Therefore, p divides P_val.
     have h_div_P : p ∣ P_val data_p := by
       unfold P_val R1_val at *;
-      haveI := Fact.mk hp; simp_all +decide [ ← ZMod.natCast_eq_zero_iff, List.prod_map_mul ] ;
+      haveI := Fact.mk hp; simp_all +decide [← ZMod.natCast_eq_zero_iff] ;
       grind;
     exact dvd_trans h_div_P ( dvd_mul_of_dvd_left ( dvd_mul_of_dvd_right ( by aesop ) _ ) _ )
 
@@ -957,13 +957,13 @@ lemma coprime_a_plus_two_R1 (data_p data_q : List (ℕ × ℕ × ℕ))
         apply prime_dvd_R1_imp_dvd_a data_p data_q h_pos p hp_prime hp_div_r1;
       simpa using Nat.dvd_sub hp_div_a2 hp_div_a;
     have := Nat.le_of_dvd ( by decide ) hp_div_2; interval_cases p <;> simp_all +decide [ ← even_iff_two_dvd, parity_simps ] ;
-    unfold R1_val at hp_div_r1; simp_all +decide [ Finset.prod_nat_mod, Nat.even_iff ] ;
+    unfold R1_val at hp_div_r1; simp_all +decide [Nat.even_iff] ;
     -- Since all primes in data_p are odd, each term in the product is odd. The product of odd numbers is odd.
     have h_odd_prod : ∀ x ∈ List.map (fun x => x.1 ^ x.2.2) data_p, Odd x := by
       simp +zetaDelta at *;
       exact fun x y z t h1 h2 => h2 ▸ Odd.pow ( hp_odd _ ( Or.inl ⟨ _, _, h1 ⟩ ) );
     have h_odd_prod : ∀ {l : List ℕ}, (∀ x ∈ l, Odd x) → Odd (List.prod l) := by
-      intros l hl; induction l <;> simp_all +decide [Nat.even_iff, Nat.odd_iff, Nat.add_mod] ;
+      intros l hl; induction l <;> simp_all +decide [Nat.odd_iff] ;
     exact absurd ( h_odd_prod ‹_› ) ( by simp +decide [ Nat.even_iff, hp_div_r1 ] )
 
 /-
@@ -977,7 +977,7 @@ lemma coprime_a_div_two_plus_one_R1 (data_p data_q : List (ℕ × ℕ × ℕ))
   let r1 := R1_val data_p
   (a / 2 + 1).Coprime r1 := by
     refine' Nat.Coprime.symm <| Nat.coprime_of_dvd' _;
-    intro k hk hk' hk''; have := Nat.dvd_sub hk'' ( Nat.dvd_div_of_mul_dvd ( show 2 * k ∣ construct_a data_p data_q from ?_ ) ) ; simp_all +decide [ Nat.dvd_add_right ] ;
+    intro k hk hk' hk''; have := Nat.dvd_sub hk'' ( Nat.dvd_div_of_mul_dvd ( show 2 * k ∣ construct_a data_p data_q from ?_ ) ) ; simp_all +decide ;
     refine' Nat.Coprime.mul_dvd_of_dvd_of_dvd _ _ _;
     · -- Since $k$ divides $R1_val$, and $R1_val$ is a product of primes from $data_p$, each of which is odd by $hp_odd$, $k$ must be one of those primes.
       have hk_prime : ∃ p ∈ data_p.map (fun x => x.1), k ∣ p := by
