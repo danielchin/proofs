@@ -128,9 +128,9 @@ lemma ratio_lemma_12 (a : ℕ) (r : Fin 3 → ℕ) (C : ℕ) (x : ℕ)
       tau (n + 1) = tau (a_seq a 1 * r 0) * tau (L (a_seq a 0) x / r 0) ∧
       tau n = tau (a_seq a 0 * r 1) * tau (L (a_seq a 1) x / r 1) := by
         constructor;
-        · -- By definition of $E2$, we � know� that $L (a_seq a 0) x / r 0$ is in $E2 C$, so its prime factors are greater than $C$.
+        · -- By definition of $E2$, we know that $L (a_seq a 0) x / r 0$ is in $E2 C$, so its prime factors are greater than $C$.
           have h_coprime : Nat.gcd (a_seq a 1 * r 0) (L (a_seq a 0) x / r 0) = 1 := by
-            -- Since $L (a_seq a 0) x / r 0 \in E2(C)$, its prime factors are � greater� than $C$.
+            -- Since $L (a_seq a 0) x / r 0 \in E2(C)$, its prime factors are greater than $C$.
             have h_prime_factors_E2 : ∀ p, Nat.Prime p → p ∣ (L (a_seq a 0) x / r 0) → p > C := by
               intro p pp dp; rcases hE1 with ⟨ p1, p2, hp1, hp2, hne, hC1, hC2, he ⟩ ; simp_all +decide ;
               simp_all +decide [ Nat.Prime.dvd_mul ];
